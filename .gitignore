@@ -1,0 +1,70 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+
+# Package directories
+*.egg
+*.egg-info/
+dist/
+build/
+*.egg-info/
+*.eggs/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# PyInstaller
+# Usually contains build artifacts and executable files for Windows or macOS
+*.spec
+dist/
+build/
+
+# macOS
+.DS_Store
+
+# Logs and other files
+*.log
+*.pot
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+.nox/
+pytest_cache/
+coverage.xml
+
+# MyPy
+.mypy_cache/
+
+# Pyre
+.pyre/
+
+# Pylint
+.pylint.d/
+
+# IDE-specific
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.iml
+
+# SQLite database
+*.sqlite3
+*.db
+
+# Local config files
+*.env
