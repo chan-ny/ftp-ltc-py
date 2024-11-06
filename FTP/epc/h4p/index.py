@@ -70,4 +70,4 @@ while True:
         last_date = current_date
 
     download_new_files()
-    time.sleep(1)  # 5 minutes in seconds
+    time.sleep(300)  # 5 minutes in seconds
