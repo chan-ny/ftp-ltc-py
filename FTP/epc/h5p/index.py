@@ -7,7 +7,7 @@ from datetime import datetime
 FTP_HOST = "172.28.12.170"
 FTP_USER = "ltcisd"
 FTP_PASS = "ISD$$123"
-REMOTE_DIR = "/CloudEPC3/SGW-PGWCDR-AP65/AP65_2/second/pgwcdr"
+REMOTE_DIR = "/CloudEPC4/SGW-PGWCDR-AP65/AP65_2/second/pgwcdr"
 LOCAL_DIR = "log_dir"
 
 # File to log downloaded files
