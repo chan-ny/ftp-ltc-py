@@ -7,7 +7,7 @@ from datetime import datetime
 FTP_HOST = "172.28.12.170"
 FTP_USER = "ltcisd"
 FTP_PASS = "ISD$$123"
-REMOTE_DIR = "/CloudEPC4/SGW-PGWCDR-AP65/AP65_2/second/pgwcdr"
+REMOTE_DIR = ["/ZTEvEPCCG/disk1/SGW", "/ZTEvEPCCG/disk2/SGW"]
 LOCAL_DIR = "log_dir"
 
 # File to log downloaded files
@@ -40,23 +40,26 @@ def download_new_files():
     ftp_password = 'ISD$$123'
     
     ftp = ftplib.FTP()
-    ftp.connect(host=ftp_server, port=2124, timeout=30000)
+    ftp.connect(host=ftp_server, port=2125, timeout=30000)
     ftp.login(user=ftp_username, passwd=ftp_password)
     print(f"Connected to {ftp_server}")
     
     current_datetime = datetime.now()
     formatted_datetime = current_datetime.strftime("%Y%m%d")
-    ftp.cwd(f'{REMOTE_DIR}/{formatted_datetime}')
-    files = ftp.nlst() 
+    
+    for remote_path in REMOTE_DIR:
+        print(remote_path)
+        ftp.cwd(f'{remote_path}/{formatted_datetime}')
+        files = ftp.nlst() 
 
-    for filename in files:
-        if filename not in downloaded_files:
-            local_file_path = os.path.join(LOCAL_DIR, filename)
-            os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
-            with open(local_file_path, "wb") as local_file:
-                ftp.retrbinary(f"RETR {filename}", local_file.write)
-            print(f"Downloaded: {filename}")
-            append_to_log(filename)
+        for filename in files:
+            if filename not in downloaded_files:
+                local_file_path = os.path.join(LOCAL_DIR, filename)
+                os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
+                with open(local_file_path, "wb") as local_file:
+                    ftp.retrbinary(f"RETR {filename}", local_file.write)
+                print(f"Downloaded: {filename}")
+                append_to_log(filename)
 
 
 
@@ -70,4 +73,4 @@ while True:
         last_date = current_date
 
     download_new_files()
-    time.sleep(300)  # 5 minutes in seconds
+    time.sleep(200)  # 5 minutes in seconds
