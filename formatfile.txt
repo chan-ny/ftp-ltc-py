@@ -1,0 +1,99 @@
+from airflow import DAG
+from airflow.providers.ftp.hooks.ftp import FTPHook
+from airflow.operators.python_operator import PythonOperator
+from datetime import datetime, timedelta
+import os
+
+# download ftp files from server
+local_file_path = '/opt/airflow/articles/'
+
+
+def download_cdr_cbs():
+    # Create FTP hook to connect to the FTP server
+    ftp_hook = FTPHook(ftp_conn_id='ftp_cdr_cbs')
+    
+    # Define local file path inside the container
+    
+    # Ensure the local directory exists
+    if not os.path.exists(local_file_path):
+        os.makedirs(local_file_path)
+    
+    # Get the date 1 day ago
+    current_datetime = datetime.now()
+    one_day_ago = current_datetime - timedelta(days=1)
+    formatted_datetime = one_day_ago.strftime("%Y%m%d")
+    
+    try:
+        # Connect to the FTP server
+        with ftp_hook.get_conn() as ftp_conn:
+            ftp_conn.set_pasv(True)
+            
+            # Change to the desired remote directory on FTP
+            remote_dir = f'/CDR_OCS/RAWCDR/OCS_ZIP/{formatted_datetime}'
+            print(f"Changing directory to {remote_dir}")
+            ftp_conn.cwd(remote_dir)
+            
+            # List files in the remote directory
+            files = ftp_conn.nlst()
+            if not files:
+                print(f"No files found in {remote_dir}")
+                return
+            
+            # Download the first file (as an example)
+            for file in files:
+                local_filepath = os.path.join(local_file_path, file)
+                print(f"Downloading {file} to {local_filepath}")
+                
+                # Download the file from FTP and save it locally
+                with open(local_filepath, 'wb') as f:
+                    ftp_conn.retrbinary(f"RETR {file}", f.write)
+                
+                print(f"Successfully downloaded {file} to {local_filepath}")
+    
+    except Exception as e:
+        print(f"Error occurred: {str(e)}")
+    
+# list files in cdr cbs
+def rename_file():
+    
+    # check items files exist
+    if len(local_file_path) > 0:
+        for file_name in os.listdir(local_file_path):
+            
+            # rename file to.add if it ends with.txt
+            if os.path.exists(file_name):
+                
+                new_file_path = file_name.replace('.add', '.txt')
+                os.rename(file_name, new_file_path)
+                print(f"Renamed {file_name} to {new_file_path}")
+            else:
+                print(f"{file_name} does not exist.")
+
+# Define the DAG
+default_args = {
+    'owner': 'airflow',
+    'start_date': datetime(2023, 9, 1),
+    'retries': 1,
+}
+
+with DAG(
+    dag_id='ftp_download_cdr_cbc',
+    default_args=default_args,
+    schedule_interval='@daily',
+    catchup=False,
+) as dag:
+
+    # Task 1: Download file from FTP
+    download_task = PythonOperator(
+        task_id='download_file',
+        python_callable=download_cdr_cbs,
+    )
+
+    # Task 2: Rename file
+    rename_task = PythonOperator(
+        task_id='rename_file',
+        python_callable=rename_file,
+    )
+
+    # Define task dependencies
+    download_task >> rename_task
